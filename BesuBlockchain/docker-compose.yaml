@@ -1,0 +1,105 @@
+version: "3.4"
+
+networks:
+  besu-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24
+
+services: 
+  bootnode:
+    container_name: bootnode
+    image: hyperledger/besu
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        /opt/besu/bin/besu --data-path=/opt/besu/data \
+        --genesis-file=/opt/besu/genesis.json --rpc-http-enabled --rpc-ws-enabled \
+        --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-ws-port="9092" \
+        --miner-enabled=true --miner-coinbase=0x0000000000000000000000000000000000000000 \
+        --min-gas-price=0 --permissions-nodes-contract-version=2 \
+        --rpc-http-api=ETH,IBFT,NET,WEB3,MINER \
+        --rpc-ws-api=ETH,IBFT,NET,WEB3,MINER;
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./node1/data:/opt/besu/data
+      - ./config.toml:/opt/besu/config.toml
+    ports:
+      - 8548:8545
+      - 30306:30303
+      - 9093:9092
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.30
+
+  
+  node:
+    container_name: node
+    image: hyperledger/besu
+
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        sleep 10;
+        /opt/besu/bin/besu --data-path=/opt/besu/data \
+         --genesis-file=/opt/besu/genesis.json --config-file=/opt/besu/config.toml --p2p-port="30303" --rpc-ws-port="9092";
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./node2/data:/opt/besu/data
+      - ./log-config.xml:/config/log-config.xml
+      - ./config.toml:/opt/besu/config.toml
+    ports:
+      - 8546:8545
+      - 30304:30303
+      - 9094:9092
+    depends_on:
+      - bootnode
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.31
+
+  
+  node2:
+    container_name: node2
+    image: hyperledger/besu
+
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        sleep 10;
+        /opt/besu/bin/besu --data-path=/opt/besu/data \
+         --genesis-file=/opt/besu/genesis.json --config-file=/opt/besu/config.toml --p2p-port="30303" --rpc-ws-port="9092";
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./node3/data:/opt/besu/data
+      - ./log-config.xml:/config/log-config.xml
+      - ./config.toml:/opt/besu/config.toml
+    ports:
+      - 8547:8545
+      - 30305:30303
+      - 9095:9092
+    depends_on:
+      - bootnode
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.32
+
+  load_balancer:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports: 
+      - "8545:8545"
+      - "30303:30303"
+      - "9092:9092"
+    depends_on:
+      - bootnode
+      - node
+      - node2
+    networks:
+      besu-network:
+        ipv4_address: 172.16.239.33
