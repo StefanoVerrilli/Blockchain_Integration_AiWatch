@@ -9,7 +9,7 @@ The proposed integration of blockchain functionalities in order to guarantee the
 
 ## System Structure 🏛
 ***
-- [architecture_utilized](https://)
+- [architecture_utilized](https://github.com/StefanoVerrilli/Blockchain_Integration_AiWatch/blob/main/images/aiwatch_arch.pdf)
 
 ## Additional resources
 ***
