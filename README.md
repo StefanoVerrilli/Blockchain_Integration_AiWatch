@@ -17,4 +17,4 @@ The proposed integration of blockchain functionalities in order to guarantee the
 - [Legacy code for the Ditto module](https://github.com/Luruu/AI_Watch_B1)
 
 ## Citation 📖
-This work is based on the research paper published for the [MDPI journal](https://www.mdpi.com/1999-5903/17/1/31):
+This work is based on the research paper published for the [MDPI journal](https://www.mdpi.com/1999-5903/17/1/31)
